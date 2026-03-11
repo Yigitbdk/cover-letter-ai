@@ -1,8 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
-import { GoogleGenerativeAI } from '@google/generative-ai'
+import Groq from 'groq-sdk'
 import { extractText } from 'unpdf'
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
+
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
 
 export async function POST(request: Request) {
   try {
@@ -13,17 +14,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Kredi kontrolü
     const { data: credits } = await supabase
       .from('credits')
       .select('amount')
       .eq('user_id', user.id)
       .single()
+
     if (!credits || credits.amount <= 0) {
       return NextResponse.json({ error: 'No credits left' }, { status: 402 })
     }
 
-    // Form data'yı al
     const formData = await request.formData()
     const cvFile = formData.get('cv') as File
     const jobDescription = formData.get('jobDescription') as string
@@ -32,16 +32,20 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing CV or job description' }, { status: 400 })
     }
 
-    // PDF'i metne çevir
-const cvBuffer = Buffer.from(await cvFile.arrayBuffer())
-const { text: cvText } = await extractText(new Uint8Array(cvBuffer), { mergePages: true })
+    const cvBuffer = Buffer.from(await cvFile.arrayBuffer())
+    const { text: cvText } = await extractText(new Uint8Array(cvBuffer), { mergePages: true })
 
-    // Gemini ile cover letter üret
-  const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-lite' })
-
-    const prompt = `You are a professional career coach and expert cover letter writer.
-
-Based on the CV and job description below, write a compelling, personalized cover letter.
+    const completion = await groq.chat.completions.create({
+      model: 'llama-3.3-70b-versatile',
+      messages: [
+        {
+          role: 'system',
+          content: `You are a professional career coach and expert cover letter writer. 
+Always respond with a valid JSON object only, no markdown, no extra text.`
+        },
+        {
+          role: 'user',
+          content: `Write a compelling, personalized cover letter based on this CV and job description.
 
 Requirements:
 - Professional but conversational tone
@@ -52,7 +56,7 @@ Requirements:
 - Extract the company name and job title from the job description
 - End with a strong call to action
 
-Return ONLY a valid JSON object in this exact format:
+Return ONLY this JSON format:
 {
   "company_name": "Company name here",
   "job_title": "Job title here",
@@ -64,15 +68,13 @@ ${cvText}
 
 Job Description:
 ${jobDescription}`
+        }
+      ],
+      response_format: { type: 'json_object' },
+    })
 
-    const result = await model.generateContent(prompt)
-    const responseText = result.response.text()
+    const parsed = JSON.parse(completion.choices[0].message.content!)
 
-    // JSON parse
-    const cleanJson = responseText.replace(/```json|```/g, '').trim()
-    const parsed = JSON.parse(cleanJson)
-
-    // Veritabanına kaydet
     const { data: application, error } = await supabase
       .from('applications')
       .insert({
@@ -88,7 +90,6 @@ ${jobDescription}`
 
     if (error) throw error
 
-    // Krediyi azalt
     await supabase
       .from('credits')
       .update({ amount: credits.amount - 1 })
