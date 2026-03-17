@@ -42,7 +42,11 @@ export default function GeneratePage() {
 
       const data = await res.json()
 
-      if (!res.ok) throw new Error(data.error || 'Something went wrong')
+      if (res.status === 402) {
+  setError('You have no credits left. Please upgrade to Pro to continue.')
+  return
+}
+if (!res.ok) throw new Error(data.error || 'Something went wrong')
 
       router.push(`/history/${data.id}`)
     } catch (err: unknown) {
@@ -145,11 +149,16 @@ export default function GeneratePage() {
         </div>
 
         {/* Error */}
-        {error && (
-          <div className="rounded-lg px-4 py-3 text-sm" style={{ backgroundColor: '#fee2e2', color: '#dc2626' }}>
-            {error}
-          </div>
-        )}
+{error && (
+  <div className="rounded-lg px-4 py-3 text-sm" style={{ backgroundColor: '#fee2e2', color: '#dc2626' }}>
+    <p>{error}</p>
+    {error.includes('no credits') && (
+      <a href="/dashboard" className="block mt-2 font-medium underline" style={{ color: '#dc2626' }}>
+        Go to dashboard to upgrade →
+      </a>
+    )}
+  </div>
+)}
 
         {/* Submit */}
         <button
