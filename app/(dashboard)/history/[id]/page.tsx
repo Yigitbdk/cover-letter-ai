@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
+import Link from 'next/link'
 import CopyButton from '@/components/shared/CopyButton'
 
 export default async function HistoryPage({ params }: { params: Promise<{ id: string }> }) {
@@ -15,40 +16,61 @@ export default async function HistoryPage({ params }: { params: Promise<{ id: st
   if (!application) notFound()
 
   return (
-    <div className="max-w-5xl mx-auto">
+    <div className="max-w-6xl mx-auto">
+
       {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center gap-3 mb-2">
-          <div
-            className="w-10 h-10 rounded-lg flex items-center justify-center text-white text-sm font-bold"
-            style={{ backgroundColor: '#f97316' }}
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center gap-4">
+          <Link
+            href="/dashboard"
+            className="text-sm transition-all duration-200 hover:opacity-70"
+            style={{ color: '#9c8880' }}
           >
-            {application.company_name?.[0]?.toUpperCase() ?? '?'}
-          </div>
-          <div>
-            <h1 className="text-2xl font-semibold" style={{ color: '#1a1614' }}>
-              {application.job_title ?? 'Untitled Position'}
-            </h1>
-            <p className="text-sm" style={{ color: '#6b5c52' }}>
-              {application.company_name ?? 'Unknown Company'} · {new Date(application.created_at).toLocaleDateString('en-US', {
-                month: 'long',
-                day: 'numeric',
-                year: 'numeric'
-              })}
-            </p>
+            ← Back
+          </Link>
+          <div className="flex items-center gap-3">
+            <div
+              className="w-10 h-10 rounded-lg flex items-center justify-center text-white text-sm font-bold flex-shrink-0"
+              style={{ backgroundColor: '#f97316' }}
+            >
+              {application.company_name?.[0]?.toUpperCase() ?? '?'}
+            </div>
+            <div>
+              <h1 className="text-xl font-semibold" style={{ color: '#1a1614' }}>
+                {application.job_title ?? 'Untitled Position'}
+              </h1>
+              <p className="text-sm" style={{ color: '#6b5c52' }}>
+                {application.company_name ?? 'Unknown Company'} · {new Date(application.created_at).toLocaleDateString('en-US', {
+                  month: 'long',
+                  day: 'numeric',
+                  year: 'numeric'
+                })}
+              </p>
+            </div>
           </div>
         </div>
+        <CopyButton text={application.cover_letter} />
       </div>
 
-      <div className="grid grid-cols-2 gap-6">
+      {/* Content */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
         {/* Job Description */}
         <div>
-          <h2 className="text-xs font-medium uppercase tracking-wide mb-3" style={{ color: '#9c8880' }}>
-            Job Description
-          </h2>
+          <div className="mb-3">
+            <h2 className="text-xs font-medium uppercase tracking-wide" style={{ color: '#9c8880' }}>
+              Job Description
+            </h2>
+          </div>
           <div
-            className="rounded-xl p-5 text-sm leading-relaxed h-96 overflow-y-auto"
-            style={{ backgroundColor: '#ffffff', border: '1px solid #e0d4c8', color: '#1a1614' }}
+            className="rounded-xl p-5 text-sm leading-relaxed overflow-y-auto"
+            style={{
+              backgroundColor: '#ffffff',
+              border: '1px solid #e0d4c8',
+              color: '#1a1614',
+              height: 'calc(100vh - 280px)',
+              minHeight: '400px'
+            }}
           >
             <p style={{ whiteSpace: 'pre-wrap' }}>{application.job_description}</p>
           </div>
@@ -56,19 +78,25 @@ export default async function HistoryPage({ params }: { params: Promise<{ id: st
 
         {/* Cover Letter */}
         <div>
-          <div className="flex items-center justify-between mb-3">
+          <div className="mb-3">
             <h2 className="text-xs font-medium uppercase tracking-wide" style={{ color: '#9c8880' }}>
               Cover Letter
             </h2>
-            <CopyButton text={application.cover_letter} />
           </div>
           <div
-            className="rounded-xl p-5 text-sm leading-relaxed h-96 overflow-y-auto"
-            style={{ backgroundColor: '#ffffff', border: '1px solid #e0d4c8', color: '#1a1614' }}
+            className="rounded-xl p-5 text-sm leading-relaxed overflow-y-auto"
+            style={{
+              backgroundColor: '#ffffff',
+              border: '1px solid #f97316',
+              color: '#1a1614',
+              height: 'calc(100vh - 280px)',
+              minHeight: '400px'
+            }}
           >
             <p style={{ whiteSpace: 'pre-wrap' }}>{application.cover_letter}</p>
           </div>
         </div>
+
       </div>
     </div>
   )

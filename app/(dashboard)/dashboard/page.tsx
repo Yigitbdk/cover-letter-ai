@@ -1,6 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
-import BuyCreditsButton from '@/components/shared/BuyCreditsButton'
 import Link from 'next/link'
+import BuyCreditsButton from '@/components/shared/BuyCreditsButton'
+import PaymentToast from '@/components/shared/PaymentToast'
+import { Suspense } from 'react'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -18,6 +20,9 @@ export default async function DashboardPage() {
 
   return (
     <div className="max-w-5xl mx-auto">
+      <Suspense>
+        <PaymentToast />
+      </Suspense>
 
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
@@ -50,14 +55,14 @@ export default async function DashboardPage() {
           </p>
         </div>
         <div className="rounded-xl p-5" style={{ backgroundColor: '#ffffff', border: '1px solid #e0d4c8' }}>
-  <p className="text-xs font-medium uppercase tracking-wide" style={{ color: '#9c8880' }}>
-    Credits Left
-  </p>
-  <p className="text-3xl font-bold mt-2" style={{ color: '#f97316' }}>
-    {credits?.amount ?? 0}
-  </p>
-  <BuyCreditsButton />
-</div>
+          <p className="text-xs font-medium uppercase tracking-wide" style={{ color: '#9c8880' }}>
+            Credits Left
+          </p>
+          <p className="text-3xl font-bold mt-2" style={{ color: '#f97316' }}>
+            {credits?.amount ?? 0}
+          </p>
+          <BuyCreditsButton />
+        </div>
         <div className="rounded-xl p-5" style={{ backgroundColor: '#ffffff', border: '1px solid #e0d4c8' }}>
           <p className="text-xs font-medium uppercase tracking-wide" style={{ color: '#9c8880' }}>
             This Month
