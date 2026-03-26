@@ -50,7 +50,7 @@ export async function POST(request: Request) {
     }
 
     // Input sanitization
-    const sanitizedJobDescription = jobDescription.trim().slice(0, 10000)
+    const sanitizedJobDescription = jobDescription.trim().slice(0, 3000)
     if (sanitizedJobDescription.length < 50) {
       return NextResponse.json({ error: 'Job description is too short' }, { status: 400 })
     }

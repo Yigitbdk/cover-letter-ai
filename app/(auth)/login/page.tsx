@@ -34,7 +34,7 @@ export default function LoginPage() {
             className="inline-flex items-center gap-2 text-sm transition-all duration-200 hover:opacity-70"
             style={{ color: '#9c8880' }}
           >
-            ← Back to home
+            Back to home
           </a>
         </div>
         
@@ -42,7 +42,14 @@ export default function LoginPage() {
         {/* Logo */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-3 mb-8">
-            <span className="text-7xl font-semibold text-white">Cover Craft</span>
+  
+              <span className="font-semibold md:text-7xl text-white"
+              style={{
+                    WebkitTextStroke: '2px #f97316',
+                    WebkitTextFillColor: 'transparent',
+                    color: 'transparent',
+                  }}>Cover Craft</span>
+
           </div>
           <h1 className="text-4xl font-bold text-white mb-4">Welcome back</h1>
           <p className="text-base" style={{ color: '#9c8880' }}>
