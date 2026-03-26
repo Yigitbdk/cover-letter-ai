@@ -7,13 +7,16 @@ export default async function HistoryPage({ params }: { params: Promise<{ id: st
   const { id } = await params
   const supabase = await createClient()
 
-  const { data: application } = await supabase
-    .from('applications')
-    .select('*')
-    .eq('id', id)
-    .single()
+  const { data: { user } } = await supabase.auth.getUser()
 
-  if (!application) notFound()
+const { data: application } = await supabase
+  .from('applications')
+  .select('*')
+  .eq('id', id)
+  .eq('user_id', user?.id)
+  .single()
+
+if (!application) notFound()
 
   return (
     <div className="max-w-6xl mx-auto">

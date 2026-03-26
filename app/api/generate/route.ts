@@ -1,3 +1,4 @@
+import { ratelimit } from '@/lib/ratelimit'
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import Groq from 'groq-sdk'
@@ -6,6 +7,13 @@ import { extractText } from 'unpdf'
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
 
 export async function POST(request: Request) {
+  const ip = request.headers.get('x-forwarded-for') ?? 'anonymous'
+  const { success } = await ratelimit.limit(ip)
+
+  if (!success) {
+    return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 })
+  }
+
   try {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
@@ -30,6 +38,21 @@ export async function POST(request: Request) {
 
     if (!cvFile || !jobDescription) {
       return NextResponse.json({ error: 'Missing CV or job description' }, { status: 400 })
+    }
+
+    // File validation
+    if (cvFile.type !== 'application/pdf') {
+      return NextResponse.json({ error: 'Only PDF files are allowed' }, { status: 400 })
+    }
+
+    if (cvFile.size > 5 * 1024 * 1024) {
+      return NextResponse.json({ error: 'File size must be under 5MB' }, { status: 400 })
+    }
+
+    // Input sanitization
+    const sanitizedJobDescription = jobDescription.trim().slice(0, 10000)
+    if (sanitizedJobDescription.length < 50) {
+      return NextResponse.json({ error: 'Job description is too short' }, { status: 400 })
     }
 
     const cvBuffer = Buffer.from(await cvFile.arrayBuffer())
@@ -67,7 +90,7 @@ CV:
 ${cvText}
 
 Job Description:
-${jobDescription}`
+${sanitizedJobDescription}`
         }
       ],
       response_format: { type: 'json_object' },
@@ -81,7 +104,7 @@ ${jobDescription}`
         user_id: user.id,
         job_title: parsed.job_title,
         company_name: parsed.company_name,
-        job_description: jobDescription,
+        job_description: sanitizedJobDescription,
         cv_text: cvText,
         cover_letter: parsed.cover_letter,
       })
