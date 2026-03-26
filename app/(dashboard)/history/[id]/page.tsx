@@ -26,7 +26,7 @@ export default async function HistoryPage({ params }: { params: Promise<{ id: st
             className="text-sm transition-all duration-200 hover:opacity-70"
             style={{ color: '#9c8880' }}
           >
-            ← Back
+            Back
           </Link>
           <div className="flex items-center gap-3">
             <div

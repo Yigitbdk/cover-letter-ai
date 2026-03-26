@@ -25,7 +25,7 @@ export default function BuyCreditsButton() {
       className="w-full mt-3 py-2 rounded-lg text-sm font-medium text-white transition-all duration-200 hover:opacity-90 disabled:opacity-50"
       style={{ backgroundColor: '#f97316' }}
     >
-      {loading ? 'Loading...' : 'Get Pro → $3/mo'}
+      {loading ? 'Loading...' : 'Get Pro'}
     </button>
   )
 }

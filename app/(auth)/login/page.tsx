@@ -28,15 +28,15 @@ export default function LoginPage() {
       <div className="relative w-full max-w-lg px-8">
 
         {/* Back to home */}
-<div className="text-center mb-8">
-  <a 
-    href="/" 
-    className="inline-flex items-center gap-2 text-sm transition-all duration-200 hover:opacity-70"
-    style={{ color: '#9c8880' }}
-  >
-    ← Back to home
-  </a>
-</div>
+        <div className="text-center mb-8">
+          <a 
+            href="/" 
+            className="inline-flex items-center gap-2 text-sm transition-all duration-200 hover:opacity-70"
+            style={{ color: '#9c8880' }}
+          >
+            ← Back to home
+          </a>
+        </div>
         
 
         {/* Logo */}

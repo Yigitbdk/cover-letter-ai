@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Cover Letter AI",
-  description: "Generate professional cover letters in seconds",
+  title: "Cover Craft",
+  description: "Generate personalized cover letters in seconds with AI",
 };
 
 export default function RootLayout({
